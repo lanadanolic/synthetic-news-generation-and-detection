@@ -30,4 +30,5 @@ data/raw/True.csv
 
 # prevelike
 data/processed/train.csv 
+data/processed/test.csv
 data/processed/augmented_train.csv
