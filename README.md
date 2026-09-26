@@ -1,7 +1,6 @@
-# synthetic-news-generation-and-detection
-Generating synthetic news using LLMs and analyzing their impact on manipulated news detection.
+# Synthetic News Generation and Detection
 
-# Comparison of Manipulated News Detection Models Before and After LLM Augmentation
+Generating synthetic news using LLMs and analyzing their impact on manipulated news detection.
 
 ## Project Description
 
@@ -20,11 +19,11 @@ Both models use the same classification approach:
 
 Three types of manipulation are considered:
 
-- `fact_change` – changing one fact
+- `fact_change` – changing one factual detail
 - `clickbait` – changing the headline to make it more attention-grabbing
-- `tone_shift` – changing the tone of the text
+- `tone_shift` – changing the tone of the text while preserving the underlying facts
 
-`gemini-3.5-flash-lite` is used to generate synthetic training data, while the challenge test is generated using `gemini-3.5-flash`.
+`gemini-3.5-flash-lite` is used to generate synthetic training data, while the challenge test is generated using `gemini-3.5-flash`. Using a different model for the challenge test reduces the possibility that the augmented detector is evaluated only on the specific generation style seen during training.
 
 ## Data
 
@@ -35,17 +34,21 @@ The ISOT Fake News Dataset is used, which contains:
 
 After cleaning, the data is split into:
 
-- 80% train
-- 20% test
+- 80% training data
+- 20% test data
 
-Synthetic training data is generated only from real news articles from the train set, while the challenge test is created from real news articles from the test set.
+Synthetic training data is generated only from real news articles from the training set, while the challenge test is created from real news articles from the test set.
 
-The `Fake.csv` and `True.csv` files are not included in the repository. They need to be downloaded from Kaggle and placed in `data/raw/`.
+The `Fake.csv` and `True.csv` files are not included in the repository. They need to be downloaded from Kaggle and placed in:
+
+```text
+data/raw/
+```
 
 ## Project Structure
 
 ```text
-synteticnewswithLLMs-ldanolic/
+synthetic-news-generation-and-detection/
 │
 ├── data/
 │   ├── raw/
@@ -86,7 +89,7 @@ The `train.csv` and `augmented_train.csv` files exist locally while working on t
 
 ## Running the Project
 
-The project should be opened from the main `synteticnewswithLLMs-ldanolic` directory.
+The project should be opened from the main `synthetic-news-generation-and-detection` directory.
 
 ### 1. Installing Libraries
 
@@ -126,7 +129,7 @@ The notebooks should be run in the following order:
 
 #### `01_data_preparation.ipynb`
 
-Loads `Fake.csv` and `True.csv`, cleans the data, assigns labels, and splits the data into train and test sets.
+Loads `Fake.csv` and `True.csv`, cleans the data, assigns labels, and splits the data into training and test sets.
 
 The following files are created:
 
@@ -137,7 +140,7 @@ data/processed/test.csv
 
 #### `02_synthetic_generation.ipynb`
 
-Synthetic manipulations are generated from real news articles from the train set using an LLM.
+Synthetic manipulations are generated from real news articles from the training set using an LLM.
 
 The following files are created:
 
@@ -160,13 +163,13 @@ models/baseline_model.joblib
 models/augmented_model.joblib
 ```
 
-After that, both models are evaluated on three challenge tests:
+Both models are evaluated separately on three challenge test manipulation types:
 
 - `fact_change`
 - `clickbait`
 - `tone_shift`
 
-Accuracy, Precision, Recall, and F1 are calculated.
+Accuracy, Precision, Recall, and F1-score are calculated.
 
 The results are saved in:
 
@@ -211,7 +214,7 @@ augmented_model = joblib.load(
 )
 ```
 
-In that case, it is not necessary to run:
+In this case, it is not necessary to run:
 
 ```python
 baseline_model.fit(...)
@@ -228,8 +231,16 @@ After loading the saved models, the evaluation can be run again, the metrics can
 | Fact change | 0.99% | 1.97% | +0.98 pp |
 | Tone shift | 28.21% | 95.31% | +67.11 pp |
 
-The largest improvement was achieved for `clickbait` and `tone_shift` manipulations. For the `fact_change` manipulation, the result remained low because only a small part of the content is changed, while the rest of the text remains almost identical to the original news article.
+The augmented model shows a substantial improvement for `clickbait` and `tone_shift` manipulations. For `fact_change`, the improvement is much smaller because only one factual detail is modified while most of the article remains unchanged.
+
+### F1 Score Comparison
+
+![Baseline vs Augmented F1 comparison](results/figures/challenge_comparison.png)
+
+The figure compares the F1 scores of the Baseline and Augmented models across all three manipulation types.
 
 ## Note on Large Files
 
-The `train.csv` and `augmented_train.csv` files are not included in the repository because they are larger than 100 MB. They can be recreated by running the corresponding notebooks.
+The `train.csv` and `augmented_train.csv` files are not included in the repository because they are larger than 100 MB.
+
+They can be recreated by running the corresponding notebooks.
